@@ -22,7 +22,6 @@
                         'primary-beige': '#D9B36C'
                     },
                     fontFamily: { sans: ['Pretendard', 'sans-serif'] },
-                    // [추가] 부드러운 그림자 확장을 위한 설정
                     boxShadow: {
                         'floating': '0 20px 40px -5px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
                     }
@@ -31,31 +30,37 @@
         }
     </script>
     <style>
-        /* 3D 효과를 위한 필수 CSS */
         .perspective-wrap {
             perspective: 1000px;
-            /* 원근감 깊이 설정 */
             transform-style: preserve-3d;
         }
 
         .policy-card {
             transform-style: preserve-3d;
-            will-change: transform, box-shadow;
+            /* 텍스트 선명도를 위한 설정 */
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transform: translateZ(0);
+            outline: none;
+            will-change: transform;
             /* 성능 최적화 */
         }
 
-        /* 광택 효과 */
-        .card-glare {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 80%);
-            opacity: 0;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            z-index: 10;
+        /* [수정] Glare(광택) CSS 완전 삭제 */
+
+        /* [수정] 텍스트(.card-content)의 3D 속성을 제거하여 선명도 확보 */
+        .card-content {
+            transform: translateZ(0);
+            /* 바닥에 딱 붙임 (선명함) */
+            background-color: #fff;
+            /* 배경색 명시 */
+        }
+
+        /* 이미지는 3D 효과 유지 (입체감) */
+        .card-image {
+            transform-style: preserve-3d;
+            transform: translateZ(20px);
         }
     </style>
 </head>
@@ -89,7 +94,7 @@
     <main class="max-w-[1200px] mx-auto px-5 py-10">
         <header class="text-center mb-16">
             <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">정책 카드 컬렉션 ✨</h1>
-            <p class="text-gray-500 text-lg">마우스를 올려보세요! 카드가 붕 떠오릅니다.</p>
+            <p class="text-gray-500 text-lg">마우스를 올려보세요! 화면 크기에 맞춰 카드가 반응합니다.</p>
         </header>
 
         <div id="card-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-10">
@@ -98,28 +103,30 @@
 
     <script>
         const policyData = [
-            { id: 1, title: "청년 안심 주택", category: "주거", img: "https://placehold.co/400x500/F48245/white?text=Housing", desc: "역세권 청년 주택 입주자 모집 공고입니다." },
-            { id: 2, title: "취업 사관학교", category: "취업", img: "https://placehold.co/400x300/4A9EA8/white?text=Job", desc: "SW 개발자 데뷔 과정 무료 교육생 모집" },
-            { id: 3, title: "학자금 대출 이자", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Loan", desc: "학자금 대출 이자 전액 지원" },
-            { id: 4, title: "마음 건강 상담소", category: "복지", img: "https://placehold.co/400x600/FF5A5F/white?text=Mind", desc: "전문 심리 상담사와 1:1 무료 상담" },
-            { id: 5, title: "전세 보증금 반환", category: "주거", img: "https://placehold.co/400x350/333/white?text=Rent", desc: "전세 사기 걱정 없는 보증료 지원" },
-            { id: 6, title: "미래 청년 일자리", category: "취업", img: "https://placehold.co/400x450/4A9EA8/white?text=Future", desc: "신산업 분야 기업 매칭 및 인건비 지원" },
-            { id: 7, title: "문화 예술 패스", category: "복지", img: "https://placehold.co/400x250/FF5A5F/white?text=Art", desc: "공연, 전시 관람비 10만원 지원" },
-            { id: 8, title: "청년 대중교통비", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Transport", desc: "대중교통 이용요금 일부 환급" }
+            // [추가] 데이터에 colorCode 속성을 추가하여 보더 색상 매핑 (없으면 기본값 사용)
+            { id: 1, title: "청년 안심 주택", category: "주거", img: "https://placehold.co/400x500/F48245/white?text=Housing", desc: "역세권 청년 주택 입주자 모집 공고입니다.", colorCode: "#F48245" },
+            { id: 2, title: "취업 사관학교", category: "취업", img: "https://placehold.co/400x300/4A9EA8/white?text=Job", desc: "SW 개발자 데뷔 과정 무료 교육생 모집", colorCode: "#4A9EA8" },
+            { id: 3, title: "학자금 대출 이자", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Loan", desc: "학자금 대출 이자 전액 지원", colorCode: "#D9B36C" },
+            { id: 4, title: "마음 건강 상담소", category: "복지", img: "https://placehold.co/400x600/FF5A5F/white?text=Mind", desc: "전문 심리 상담사와 1:1 무료 상담", colorCode: "#FF5A5F" },
+            { id: 5, title: "전세 보증금 반환", category: "주거", img: "https://placehold.co/400x350/333/white?text=Rent", desc: "전세 사기 걱정 없는 보증료 지원", colorCode: "#F48245" },
+            { id: 6, title: "미래 청년 일자리", category: "취업", img: "https://placehold.co/400x450/4A9EA8/white?text=Future", desc: "신산업 분야 기업 매칭 및 인건비 지원", colorCode: "#4A9EA8" },
+            { id: 7, title: "문화 예술 패스", category: "복지", img: "https://placehold.co/400x250/FF5A5F/white?text=Art", desc: "공연, 전시 관람비 10만원 지원", colorCode: "#FF5A5F" },
+            { id: 8, title: "청년 대중교통비", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Transport", desc: "대중교통 이용요금 일부 환급", colorCode: "#D9B36C" }
         ];
 
         function renderCards() {
             const container = document.getElementById('card-container');
             container.innerHTML = policyData.map(item => `
             <div class="perspective-wrap group h-full">
-                <div class="policy-card relative bg-white rounded-xl overflow-hidden h-full flex flex-col border border-gray-100 shadow-sm transition-shadow">
-                    <div class="card-glare"></div>
+                <div class="policy-card relative bg-white rounded-xl overflow-hidden h-full flex flex-col border border-gray-100 shadow-sm transition-shadow" 
+                     tabindex="0"
+                     data-color="${item.colorCode}"> 
                     
                     <div class="card-image w-full bg-white flex items-end justify-center shrink-0 h-[200px] overflow-hidden">
                         <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                     </div>
 
-                    <div class="card-content text-left bg-white flex-grow flex flex-col justify-between p-5 z-20 relative">
+                    <div class="card-content text-left flex-grow flex flex-col justify-between p-5 z-20 relative">
                         <div>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs font-bold text-primary-orange bg-orange-100 px-2 py-0.5 rounded">#${item.category}</span>
@@ -142,35 +149,60 @@
         function init3DEffect() {
             const wrappers = document.querySelectorAll('.perspective-wrap');
 
+            const getResponsiveSettings = () => {
+                const width = window.innerWidth;
+
+                if (width >= 1280) {
+                    return { scale: 1.2, y: -15 };
+                } else if (width >= 1024) {
+                    return { scale: 1.15, y: -12 };
+                } else if (width >= 640) {
+                    return { scale: 1.08, y: -8 };
+                } else {
+                    return { scale: 1.03, y: -4 };
+                }
+            };
+
             wrappers.forEach(wrapper => {
                 const card = wrapper.querySelector('.policy-card');
-                const glare = wrapper.querySelector('.card-glare');
+                const cardImage = wrapper.querySelector('.card-image img');
 
-                // 1. 마우스 진입 (Float Up + Scale Up)
-                wrapper.addEventListener('mouseenter', () => {
-                    // 순서 중요: z-index를 먼저 올려야 옆 카드에 가려지지 않음
+                // [추가 기능] 카드별 테두리 색상 가져오기
+                const borderColor = card.dataset.color || '#4A9EA8';
+
+                // --- 1. 진입 효과 (Hover & Focus) ---
+                const handleEnter = () => {
+                    const settings = getResponsiveSettings();
+
                     gsap.set(wrapper, { zIndex: 50 });
 
                     gsap.to(card, {
                         duration: 0.4,
-                        scale: 1.2,          // [요청사항] 1.2배 확대
-                        y: -15,              // [요청사항] 공중부양 (위로 15px)
-                        boxShadow: "0 30px 60px -10px rgba(0,0,0,0.25)", // [요청사항] 깊은 그림자
-                        ease: "back.out(1.5)", // [핵심] 붕 뜨는 느낌 (Bouncy)
+                        scale: settings.scale,
+                        y: settings.y,
+                        // [추가 기능] 호버 시 카테고리 색상으로 Border 변경
+                        borderColor: borderColor,
+                        boxShadow: `0 30px 60px -10px rgba(0,0,0,0.25)`,
+                        ease: "back.out(1.5)",
                         overwrite: "auto"
                     });
-                });
+                };
 
-                // 2. 마우스 움직임 (Subtle 3D Tilt)
-                // 너무 과격하면 '떠오르는 느낌'을 방해하므로 각도를 줄임
+                wrapper.addEventListener('mouseenter', handleEnter);
+                card.addEventListener('focusin', handleEnter);
+
+
+                // --- 2. 움직임 효과 (Tilt + Parallax) ---
                 wrapper.addEventListener('mousemove', (e) => {
+                    if (window.innerWidth < 768) return;
+
                     const rect = wrapper.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
 
-                    // 각도를 10도로 제한 (이전 35도는 너무 과함)
+                    // 틸트 각도
                     const rotateX = ((y - centerY) / centerY) * -10;
                     const rotateY = ((x - centerX) / centerX) * 10;
 
@@ -183,39 +215,47 @@
                         overwrite: "auto"
                     });
 
-                    // 광택 효과 이동
-                    if (glare) {
-                        gsap.to(glare, {
-                            duration: 0.2,
-                            opacity: 0.6,
-                            backgroundPosition: `${(x / rect.width) * 100}% ${(y / rect.height) * 100}%`
-                        });
-                    }
+                    // 이미지는 반대로 움직여 깊이감 형성 (패럴랙스)
+                    gsap.to(cardImage, {
+                        duration: 0.2,
+                        x: (x - centerX) * 0.05,
+                        y: (y - centerY) * 0.05,
+                        ease: "power1.out"
+                    });
+
+                    // [수정] 텍스트 패럴랙스 제거 (선명도 확보를 위해)
+                    // 텍스트는 움직이지 않고 카드에 딱 붙어있게 합니다.
                 });
 
-                // 3. 마우스 나감 (Reset)
-                wrapper.addEventListener('mouseleave', () => {
-                    // z-index는 애니메이션이 끝나갈 때쯤 복구 (툭 끊김 방지)
+
+                // --- 3. 나감 효과 (Reset) ---
+                const handleLeave = () => {
                     gsap.delayedCall(0.3, () => { gsap.set(wrapper, { zIndex: 1 }); });
 
                     gsap.to(card, {
                         duration: 0.6,
-                        scale: 1,           // 크기 원복
-                        y: 0,               // 위치 원복
-                        rotateX: 0,         // 회전 원복
+                        scale: 1,
+                        y: 0,
+                        rotateX: 0,
                         rotateY: 0,
-                        boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", // 기본 그림자로 복구
-                        ease: "power3.out", // 부드럽게 착륙
+                        borderColor: '#e5e7eb', // 원래 회색(gray-200)으로 복구
+                        boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                        ease: "power3.out",
                         overwrite: true
                     });
 
-                    if (glare) {
-                        gsap.to(glare, { duration: 0.5, opacity: 0 });
-                    }
-                });
+                    gsap.to(cardImage, {
+                        duration: 0.6,
+                        x: 0,
+                        y: 0,
+                        ease: "power3.out"
+                    });
+                };
+
+                wrapper.addEventListener('mouseleave', handleLeave);
+                card.addEventListener('focusout', handleLeave);
             });
 
-            // 초기 등장 애니메이션
             gsap.from(".perspective-wrap", {
                 y: 50,
                 opacity: 0,

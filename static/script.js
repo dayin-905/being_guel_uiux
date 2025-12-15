@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loop: false, // 한 번만 재생하고 멈춤 (계속 돌게 하려면 true)
         autoplay: true, // 자동 재생
         // [중요] 디자이너님이 만든 json 파일 경로를 넣거나, 테스트용 무료 json 주소를 넣으세요
-        path: 'https://assets3.lottiefiles.com/packages/lf20_UJNc2t.json' 
+        path: 'https://assets3.lottiefiles.com/packages/lf20_UJNc2t.json'
     });
 
     // 2. 애니메이션이 끝나면 커튼 걷어내기 (GSAP)
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             onComplete: () => {
                 // 애니메이션 끝나면 아예 화면에서 없애버리기 (클릭 방해 안 되게)
                 document.getElementById("preloader").style.display = "none";
-                
+
                 // [선택] 이때 메인 텍스트가 쓱 올라오게 하면 더 멋짐!
                 gsap.from(".header-text", { y: 50, opacity: 0, duration: 1 });
             }
@@ -487,21 +487,21 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== [6. New Logic: Region Filter & Transition] ====================
 // landing.html에서 넘어온 ?region=seoul 파라미터를 처리합니다.
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     // 1. URL에서 region 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
     const regionId = urlParams.get('region'); // 예: 'seoul'
 
     // 2. 화면 진입 애니메이션 (Landing 페이지의 줌인 효과와 이어지도록)
     // body 전체가 하얀색(투명도 0)에서 서서히 나타나게 함
-    gsap.fromTo("body", 
-        { opacity: 0 }, 
+    gsap.fromTo("body",
+        { opacity: 0 },
         { opacity: 1, duration: 1.2, ease: "power2.out" }
     );
 
     // 3. 지역 ID 한글 매핑 데이터
     const REGION_NAMES = {
-        'seoul': '서울특별시', 'gangwon': '강원도', 
+        'seoul': '서울특별시', 'gangwon': '강원도',
         'chungbug': '충청북도', 'chungnam': '충청남도',
         'jeonbug': '전라북도', 'jeonnam': '전라남도',
         'gyeongbug': '경상북도', 'gyeongnam': '경상남도',
@@ -516,8 +516,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // [Header Text 수정]
         const headerTitle = document.querySelector('.header-text h1');
         const headerDesc = document.querySelector('.header-text p');
-        
-        if(headerTitle) {
+
+        if (headerTitle) {
             // 기존 텍스트가 살짝 사라졌다가, 새로운 지역명으로 바뀌며 등장
             gsap.to(headerTitle, {
                 opacity: 0,
@@ -529,8 +529,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-        
-        if(headerDesc) {
+
+        if (headerDesc) {
             gsap.to(headerDesc, {
                 opacity: 0,
                 duration: 0.3,
@@ -544,142 +544,143 @@ document.addEventListener("DOMContentLoaded", () => {
         // [Search Input 자동 입력]
         // 사용자가 검색창을 봤을 때 해당 지역이 이미 태그되어 있는 느낌 제공
         const searchInput = document.getElementById('search-input');
-        if(searchInput) {
+        if (searchInput) {
             searchInput.value = `#${regionName} #취업지원`;
         }
     }
 });
 
 // =========================================================================
-        // [수정된 버전] 맵 이벤트 초기화 함수 (디버깅 강화 및 path 지원)
-        // =========================================================================
-        function initMapEvents() {
-            const svgElement = document.querySelector('#svg-container svg');
-            if (!svgElement) {
-                console.error("❌ SVG 요소를 찾을 수 없습니다.");
-                return;
-            }
+// [수정된 버전] 맵 이벤트 초기화 함수 (디버깅 강화 및 path 지원)
+// =========================================================================
+function initMapEvents() {
+    const svgElement = document.querySelector('#svg-container svg');
+    if (!svgElement) {
+        console.error("❌ SVG 요소를 찾을 수 없습니다.");
+        return;
+    }
 
-            const tooltip = document.querySelector('#info-tooltip');
-            const tooltipLine = tooltip.querySelector('.tooltip-line');
-            const tooltipContent = tooltip.querySelector('.tooltip-content');
-            const tTitle = tooltip.querySelector('.tooltip-title');
-            const tCountSpan = tooltip.querySelector('.tooltip-count span');
-            const overlay = document.getElementById('transition-overlay');
+    const tooltip = document.querySelector('#info-tooltip');
+    const tooltipLine = tooltip.querySelector('.tooltip-line');
+    const tooltipContent = tooltip.querySelector('.tooltip-content');
+    const tTitle = tooltip.querySelector('.tooltip-title');
+    const tCountSpan = tooltip.querySelector('.tooltip-count span');
+    const overlay = document.getElementById('transition-overlay');
 
-            // [핵심 수정 1] g 태그뿐만 아니라 path 태그도 검사 대상에 포함
-            // 어떤 툴은 그룹에 ID를 주고, 어떤 툴은 패스에 ID를 줍니다. 둘 다 찾습니다.
-            const allElements = svgElement.querySelectorAll('g, path');
-            
-            // 현재 활성화해야 할 ID 목록 (데이터베이스 키값들)
-            const activeIds = Object.keys(currentConfig.db);
-            
-            console.log(`[InitMap] 현재 모드: ${currentRegionKey}`);
-            console.log(`[InitMap] 활성 타겟 ID 목록:`, activeIds);
+    // [핵심 수정 1] g 태그뿐만 아니라 path 태그도 검사 대상에 포함
+    // 어떤 툴은 그룹에 ID를 주고, 어떤 툴은 패스에 ID를 줍니다. 둘 다 찾습니다.
+    const allElements = svgElement.querySelectorAll('g, path');
 
-            let matchCount = 0;
+    // 현재 활성화해야 할 ID 목록 (데이터베이스 키값들)
+    const activeIds = Object.keys(currentConfig.db);
 
-            allElements.forEach(element => {
-                const rawId = element.id || '';
-                if (!rawId) return; // ID가 없는 요소는 무시
+    console.log(`[InitMap] 현재 모드: ${currentRegionKey}`);
+    console.log(`[InitMap] 활성 타겟 ID 목록:`, activeIds);
 
-                const regionId = rawId.trim(); // 공백 제거
+    let matchCount = 0;
 
-                // 1. 랜드마크 처리
-                if (regionId.toLowerCase().includes('lm')) {
-                    element.classList.add('landmark-piece');
-                    // 랜드마크는 별도 이벤트 로직 (필요시 추가)
-                    return; 
+    allElements.forEach(element => {
+        const rawId = element.id || '';
+        if (!rawId) return; // ID가 없는 요소는 무시
+
+        const regionId = rawId.trim(); // 공백 제거
+
+        // 1. 랜드마크 처리
+        if (regionId.toLowerCase().includes('lm')) {
+            element.classList.add('landmark-piece');
+            // 랜드마크는 별도 이벤트 로직 (필요시 추가)
+            return;
+        }
+
+        // 2. 활성 영역 매칭 확인
+        if (activeIds.includes(regionId)) {
+            matchCount++;
+            console.log(`✅ 매칭 성공: ${regionId} (태그: ${element.tagName})`);
+
+            element.classList.add('puzzle-piece');
+
+            // [Hover Event]
+            element.addEventListener('mouseenter', function () {
+                // z-index 상위로 올리기 (path는 appendChild로 순서 변경 시 깨질 수 있으니 주의)
+                // 그룹(g)일 경우에만 순서 변경 시도
+                if (this.tagName.toLowerCase() === 'g') {
+                    this.parentNode.appendChild(this);
                 }
 
-                // 2. 활성 영역 매칭 확인
-                if (activeIds.includes(regionId)) {
-                    matchCount++;
-                    console.log(`✅ 매칭 성공: ${regionId} (태그: ${element.tagName})`);
+                const data = currentConfig.db[regionId] || { name: 'Unknown', count: 0 };
+                tTitle.innerText = data.name;
+                tCountSpan.innerText = data.count.toLocaleString();
 
-                    element.classList.add('puzzle-piece');
+                const rect = element.getBoundingClientRect();
+                tooltip.style.display = 'flex';
 
-                    // [Hover Event]
-                    element.addEventListener('mouseenter', function() {
-                        // z-index 상위로 올리기 (path는 appendChild로 순서 변경 시 깨질 수 있으니 주의)
-                        // 그룹(g)일 경우에만 순서 변경 시도
-                        if(this.tagName.toLowerCase() === 'g') {
-                            this.parentNode.appendChild(this);
-                        }
-                        
-                        const data = currentConfig.db[regionId] || { name: 'Unknown', count: 0 };
-                        tTitle.innerText = data.name;
-                        tCountSpan.innerText = data.count.toLocaleString();
-
-                        const rect = element.getBoundingClientRect();
-                        tooltip.style.display = 'flex';
-                        
-                        // 툴팁 위치 계산 로직
-                        let isLeft = false;
-                        if(currentRegionKey === 'national') {
-                            isLeft = (currentConfig.leftSideIds || []).includes(regionId);
-                        } else {
-                            isLeft = (rect.left + rect.width/2) < (window.innerWidth / 2);
-                        }
-                        
-                        if (isLeft) {
-                            tooltip.style.flexDirection = 'row-reverse';
-                            tooltipLine.style.marginRight = '0px'; tooltipLine.style.marginLeft = '10px'; tooltipLine.style.transformOrigin = 'right center';
-                            tooltipContent.style.alignItems = 'flex-end';
-                            const startX = rect.left + (rect.width * 0.2); const startY = rect.top + (rect.height * 0.3);
-                            tooltip.style.left = 'auto'; tooltip.style.right = `${window.innerWidth - startX}px`; tooltip.style.top = `${startY}px`;
-                        } else {
-                            tooltip.style.flexDirection = 'row';
-                            tooltipLine.style.marginRight = '10px'; tooltipLine.style.marginLeft = '0px'; tooltipLine.style.transformOrigin = 'left center';
-                            tooltipContent.style.alignItems = 'flex-start';
-                            const startX = rect.right - (rect.width * 0.2); const startY = rect.top + (rect.height * 0.3);
-                            tooltip.style.right = 'auto'; tooltip.style.left = `${startX}px`; tooltip.style.top = `${startY}px`;
-                        }
-
-                        if (tooltipTimeline) tooltipTimeline.kill();
-                        tooltipTimeline = gsap.timeline();
-                        tooltipTimeline.set(tooltipLine, { width: 0 }).set(tooltipContent, { opacity: 0, y: 10 })
-                            .to(tooltipLine, { width: 80, duration: 0.4, ease: "power2.out" })
-                            .to(tooltipContent, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }, "-=0.2");
-                    });
-
-                    // [Leave Event]
-                    element.addEventListener('mouseleave', function() {
-                        if (tooltipTimeline) tooltipTimeline.kill();
-                        tooltip.style.display = 'none';
-                    });
-
-                    // [Click Event]
-                    element.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        tooltip.style.display = 'none';
-
-                        if (!isDetailMode) {
-                            // 전국 -> 상세 이동
-                             gsap.timeline()
-                                .to(element, { scale: 1.2, duration: 0.2, ease: "back.in(2)", zIndex: 100 }) 
-                                .to("#svg-container", { scale: 5, opacity: 0, duration: 0.8, ease: "power4.in" })
-                                .to(overlay, { opacity: 1, duration: 0.5 }, "<0.3")
-                                .to({}, { onComplete: () => { 
-                                    window.location.search = `?region=${regionId}`; 
-                                } });
-                        } else {
-                            // 상세 -> 뉴스 등 이동
-                            alert(`${currentConfig.db[regionId].name} 상세 페이지로 이동합니다. (구현 예정)`);
-                        }
-                    });
+                // 툴팁 위치 계산 로직
+                let isLeft = false;
+                if (currentRegionKey === 'national') {
+                    isLeft = (currentConfig.leftSideIds || []).includes(regionId);
                 } else {
-                    // 매칭되지 않는 요소 (배경 등)
-                    // 단, ID가 있는 경우에만 disabled 처리를 하여 불필요한 요소 간섭 최소화
-                    if (rawId) {
-                         element.classList.add('region-disabled');
-                    }
+                    isLeft = (rect.left + rect.width / 2) < (window.innerWidth / 2);
                 }
+
+                if (isLeft) {
+                    tooltip.style.flexDirection = 'row-reverse';
+                    tooltipLine.style.marginRight = '0px'; tooltipLine.style.marginLeft = '10px'; tooltipLine.style.transformOrigin = 'right center';
+                    tooltipContent.style.alignItems = 'flex-end';
+                    const startX = rect.left + (rect.width * 0.2); const startY = rect.top + (rect.height * 0.3);
+                    tooltip.style.left = 'auto'; tooltip.style.right = `${window.innerWidth - startX}px`; tooltip.style.top = `${startY}px`;
+                } else {
+                    tooltip.style.flexDirection = 'row';
+                    tooltipLine.style.marginRight = '10px'; tooltipLine.style.marginLeft = '0px'; tooltipLine.style.transformOrigin = 'left center';
+                    tooltipContent.style.alignItems = 'flex-start';
+                    const startX = rect.right - (rect.width * 0.2); const startY = rect.top + (rect.height * 0.3);
+                    tooltip.style.right = 'auto'; tooltip.style.left = `${startX}px`; tooltip.style.top = `${startY}px`;
+                }
+
+                if (tooltipTimeline) tooltipTimeline.kill();
+                tooltipTimeline = gsap.timeline();
+                tooltipTimeline.set(tooltipLine, { width: 0 }).set(tooltipContent, { opacity: 0, y: 10 })
+                    .to(tooltipLine, { width: 80, duration: 0.4, ease: "power2.out" })
+                    .to(tooltipContent, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }, "-=0.2");
             });
 
-            if (matchCount === 0) {
-                console.warn("⚠️ 경고: 데이터와 매칭된 SVG 요소가 하나도 없습니다. SVG 파일의 ID를 확인하세요.");
-                console.log("힌트: 일러스트레이터 레이어 이름이 'detail_busan' 등으로 정확히 설정되었는지 확인하세요.");
+            // [Leave Event]
+            element.addEventListener('mouseleave', function () {
+                if (tooltipTimeline) tooltipTimeline.kill();
+                tooltip.style.display = 'none';
+            });
+
+            // [Click Event]
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                tooltip.style.display = 'none';
+
+                if (!isDetailMode) {
+                    // 전국 -> 상세 이동
+                    gsap.timeline()
+                        .to(element, { scale: 1.2, duration: 0.2, ease: "back.in(2)", zIndex: 100 })
+                        .to("#svg-container", { scale: 5, opacity: 0, duration: 0.8, ease: "power4.in" })
+                        .to(overlay, { opacity: 1, duration: 0.5 }, "<0.3")
+                        .to({}, {
+                            onComplete: () => {
+                                window.location.search = `?region=${regionId}`;
+                            }
+                        });
+                } else {
+                    // 상세 -> 뉴스 등 이동
+                    alert(`${currentConfig.db[regionId].name} 상세 페이지로 이동합니다. (구현 예정)`);
+                }
+            });
+        } else {
+            // 매칭되지 않는 요소 (배경 등)
+            // 단, ID가 있는 경우에만 disabled 처리를 하여 불필요한 요소 간섭 최소화
+            if (rawId) {
+                element.classList.add('region-disabled');
             }
         }
-        
+    });
+
+    if (matchCount === 0) {
+        console.warn("⚠️ 경고: 데이터와 매칭된 SVG 요소가 하나도 없습니다. SVG 파일의 ID를 확인하세요.");
+        console.log("힌트: 일러스트레이터 레이어 이름이 'detail_busan' 등으로 정확히 설정되었는지 확인하세요.");
+    }
+}

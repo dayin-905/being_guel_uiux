@@ -1,3 +1,5 @@
+# http://192.168.64.1:8000/all.html
+
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
