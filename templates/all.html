@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>전체 정책 보기 | 쓱쓱</title>
-
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="/static/style.css">
@@ -22,15 +21,46 @@
                         'primary-teal': '#4A9EA8',
                         'primary-beige': '#D9B36C'
                     },
-                    fontFamily: { sans: ['Pretendard', 'sans-serif'] }
+                    fontFamily: { sans: ['Pretendard', 'sans-serif'] },
+                    // [추가] 부드러운 그림자 확장을 위한 설정
+                    boxShadow: {
+                        'floating': '0 20px 40px -5px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
+                    }
                 }
             }
         }
     </script>
+    <style>
+        /* 3D 효과를 위한 필수 CSS */
+        .perspective-wrap {
+            perspective: 1000px;
+            /* 원근감 깊이 설정 */
+            transform-style: preserve-3d;
+        }
+
+        .policy-card {
+            transform-style: preserve-3d;
+            will-change: transform, box-shadow;
+            /* 성능 최적화 */
+        }
+
+        /* 광택 효과 */
+        .card-glare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 80%);
+            opacity: 0;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            z-index: 10;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 font-sans">
-
     <nav
         class="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-md transition-all duration-300">
         <div class="mx-auto flex h-[80px] max-w-[1200px] items-center justify-center md:justify-between px-5">
@@ -59,7 +89,7 @@
     <main class="max-w-[1200px] mx-auto px-5 py-10">
         <header class="text-center mb-16">
             <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">정책 카드 컬렉션 ✨</h1>
-            <p class="text-gray-500 text-lg">마우스를 올려보세요! 카드가 입체적으로 반응합니다.</p>
+            <p class="text-gray-500 text-lg">마우스를 올려보세요! 카드가 붕 떠오릅니다.</p>
         </header>
 
         <div id="card-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-10">
@@ -81,25 +111,25 @@
         function renderCards() {
             const container = document.getElementById('card-container');
             container.innerHTML = policyData.map(item => `
-            <div class="perspective-wrap group" style="z-index: 1;">
-                <div class="policy-card is-3d relative bg-white overflow-hidden h-full flex flex-col border border-gray-200">
+            <div class="perspective-wrap group h-full">
+                <div class="policy-card relative bg-white rounded-xl overflow-hidden h-full flex flex-col border border-gray-100 shadow-sm transition-shadow">
                     <div class="card-glare"></div>
                     
-                    <div class="card-image w-full bg-white flex items-end justify-center shrink-0">
-                        <img src="${item.img}" alt="${item.title}" class="object-contain object-bottom">
+                    <div class="card-image w-full bg-white flex items-end justify-center shrink-0 h-[200px] overflow-hidden">
+                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                     </div>
 
-                    <div class="card-content text-left bg-[#F6F6F7] flex-grow flex flex-col justify-between p-5">
+                    <div class="card-content text-left bg-white flex-grow flex flex-col justify-between p-5 z-20 relative">
                         <div>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs font-bold text-primary-orange bg-orange-100 px-2 py-0.5 rounded">#${item.category}</span>
                             </div>
-                            <h3 class="card-title mb-2 line-clamp-1 text-xl font-extrabold text-[#222]">${item.title}</h3>
+                            <h3 class="card-title mb-2 line-clamp-1 text-xl font-extrabold text-[#222] group-hover:text-primary-teal transition-colors">${item.title}</h3>
                             <p class="card-desc line-clamp-2 text-sm text-[#666] font-medium">${item.desc}</p>
                         </div>
-                        <div class="card-date flex justify-between items-center mt-3 text-xs text-[#888]">
+                        <div class="card-date flex justify-between items-center mt-4 text-xs text-[#888] border-t pt-3 border-gray-100">
                             <span>2025.12.31 마감</span>
-                            <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-primary-teal transition-colors"></i>
+                            <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-primary-teal transition-transform group-hover:translate-x-1"></i>
                         </div>
                     </div>
                 </div>
@@ -116,58 +146,66 @@
                 const card = wrapper.querySelector('.policy-card');
                 const glare = wrapper.querySelector('.card-glare');
 
-                // 1. 마우스 진입 (Z-Index 최상단으로!)
+                // 1. 마우스 진입 (Float Up + Scale Up)
                 wrapper.addEventListener('mouseenter', () => {
-                    gsap.to(wrapper, { zIndex: 100, duration: 0 }); // 즉시 위로
+                    // 순서 중요: z-index를 먼저 올려야 옆 카드에 가려지지 않음
+                    gsap.set(wrapper, { zIndex: 50 });
+
+                    gsap.to(card, {
+                        duration: 0.4,
+                        scale: 1.2,          // [요청사항] 1.2배 확대
+                        y: -15,              // [요청사항] 공중부양 (위로 15px)
+                        boxShadow: "0 30px 60px -10px rgba(0,0,0,0.25)", // [요청사항] 깊은 그림자
+                        ease: "back.out(1.5)", // [핵심] 붕 뜨는 느낌 (Bouncy)
+                        overwrite: "auto"
+                    });
                 });
 
-                // 2. 마우스 움직임 (과격한 회전)
+                // 2. 마우스 움직임 (Subtle 3D Tilt)
+                // 너무 과격하면 '떠오르는 느낌'을 방해하므로 각도를 줄임
                 wrapper.addEventListener('mousemove', (e) => {
                     const rect = wrapper.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
 
-                    // [핵심] 각도를 35도까지 팍팍 꺾어버림
-                    const rotateX = ((y - centerY) / centerY) * -35;
-                    const rotateY = ((x - centerX) / centerX) * 35;
+                    // 각도를 10도로 제한 (이전 35도는 너무 과함)
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
 
                     gsap.to(card, {
-                        duration: 0.1,
+                        duration: 0.2,
                         rotateX: rotateX,
                         rotateY: rotateY,
-                        scale: 1.15, // 확대도 확실하게
-                        // 그림자를 아주 멀리 떨어뜨려서 붕 뜬 느낌 강조
-                        boxShadow: "0 50px 100px -20px rgba(0,0,0,0.5)",
-                        ease: "none", // 즉각 반응
-                        overwrite: "auto",
-                        transformPerspective: 600, // [핵심] 원근감을 줄여서 더 왜곡되게 (다이내믹)
-                        transformOrigin: "center center"
+                        transformPerspective: 1000,
+                        ease: "power1.out",
+                        overwrite: "auto"
                     });
 
+                    // 광택 효과 이동
                     if (glare) {
                         gsap.to(glare, {
-                            duration: 0.1,
-                            opacity: 1, // 광택도 쨍하게
+                            duration: 0.2,
+                            opacity: 0.6,
                             backgroundPosition: `${(x / rect.width) * 100}% ${(y / rect.height) * 100}%`
                         });
                     }
                 });
 
-                // 3. 마우스 나감 (복귀)
+                // 3. 마우스 나감 (Reset)
                 wrapper.addEventListener('mouseleave', () => {
-                    // Z-Index 복구는 애니메이션 끝난 뒤에 (안 그러면 툭 끊김)
-                    gsap.delayedCall(0.5, () => { wrapper.style.zIndex = 1; });
+                    // z-index는 애니메이션이 끝나갈 때쯤 복구 (툭 끊김 방지)
+                    gsap.delayedCall(0.3, () => { gsap.set(wrapper, { zIndex: 1 }); });
 
                     gsap.to(card, {
-                        duration: 0.8,
-                        rotateX: 0,
+                        duration: 0.6,
+                        scale: 1,           // 크기 원복
+                        y: 0,               // 위치 원복
+                        rotateX: 0,         // 회전 원복
                         rotateY: 0,
-                        scale: 1,
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                        ease: "elastic.out(1, 0.5)",
+                        boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", // 기본 그림자로 복구
+                        ease: "power3.out", // 부드럽게 착륙
                         overwrite: true
                     });
 
@@ -177,9 +215,13 @@
                 });
             });
 
-            // 등장 애니메이션
+            // 초기 등장 애니메이션
             gsap.from(".perspective-wrap", {
-                y: 100, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out"
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power2.out"
             });
         }
 
