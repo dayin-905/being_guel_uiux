@@ -30,7 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
 // GSAP 플러그인 등록
 gsap.registerPlugin(ScrollTrigger);
 
-const categories = ["교육/역량", "취업/창업", "금융/자산", "창업", "복지/건강", "참여/권리"];
+const categories = [
+    "취업/직무",    // job
+    "창업/사업",    // startup
+    "주거/자립",    // housing
+    "금융/생활비",  // finance
+    "교육/자격증",  // growth
+    "복지/문화"     // welfare
+];
 
 function generatePolicyData(count) {
     const data = [];
@@ -55,6 +62,29 @@ const myLikedData = generatePolicyData(5);
 // ==================== [2. UI Rendering Helpers] ====================
 function createCardHTML(item, isTinder = false) {
     const isMobile = window.innerWidth <= 768; // 모바일 체크
+
+    // 1. 이미지 경로 생성 로직
+    // (1) 카테고리 이름(한글)을 파일명 접두사(영어)로 연결
+    const categoryMap = {
+        // [백엔드 카테고리명] : [이미지 파일 접두사]
+        "취업/직무": "job",       // job_1.webp
+        "창업/사업": "startup",   // startup_1.webp
+        "주거/자립": "housing",   // housing_1.webp
+        "금융/생활비": "finance", // finance_1.webp
+        "교육/자격증": "growth",  // growth_1.webp
+        "복지/문화": "welfare"    // welfare_1.webp
+    };
+
+    // (2) 영문 접두사 찾기 (없으면 'welfare' 기본값)
+    const prefix = categoryMap[item.category] || "welfare";
+
+    // (3) ID를 기준으로 1~5번 이미지 중 하나 선택 (고정 랜덤)
+    // item.id가 없으면 1번으로 설정
+    const safeId = item.id || 1;
+    const imgIndex = (safeId % 5) + 1;
+
+    // (4) 최종 경로 완성 (예: /static/images/card_images/job_3.webp)
+    const localImageUrl = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
 
     // [Tinder 카드일 때]
     if (isTinder) {
