@@ -102,6 +102,16 @@
     </main>
 
     <script>
+        // 1. 카테고리 매핑 정보 추가 (이미지 파일명 연결용)
+        const categoryMap = {
+            "주거": "housing",
+            "취업": "job",
+            "금융": "finance",
+            "복지": "welfare",
+            "창업": "startup",
+            "교육": "growth"
+        };
+
         const policyData = [
             // [추가] 데이터에 colorCode 속성을 추가하여 보더 색상 매핑 (없으면 기본값 사용)
             { id: 1, title: "청년 안심 주택", category: "주거", img: "https://placehold.co/400x500/F48245/white?text=Housing", desc: "역세권 청년 주택 입주자 모집 공고입니다.", colorCode: "#F48245" },
@@ -112,7 +122,14 @@
             { id: 6, title: "미래 청년 일자리", category: "취업", img: "https://placehold.co/400x450/4A9EA8/white?text=Future", desc: "신산업 분야 기업 매칭 및 인건비 지원", colorCode: "#4A9EA8" },
             { id: 7, title: "문화 예술 패스", category: "복지", img: "https://placehold.co/400x250/FF5A5F/white?text=Art", desc: "공연, 전시 관람비 10만원 지원", colorCode: "#FF5A5F" },
             { id: 8, title: "청년 대중교통비", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Transport", desc: "대중교통 이용요금 일부 환급", colorCode: "#D9B36C" }
-        ];
+        ].map(item => {
+            // [핵심] 여기서 로컬 이미지 경로를 자동으로 만들어줍니다!
+            const prefix = categoryMap[item.category] || "welfare";
+            const imgIndex = (item.id % 5) + 1;
+            // img 속성을 덮어씌움 (기존 url 삭제됨)
+            item.img = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
+            return item;
+        });
 
         function renderCards() {
             const container = document.getElementById('card-container');

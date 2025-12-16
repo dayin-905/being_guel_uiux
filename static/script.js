@@ -30,61 +30,88 @@ document.addEventListener("DOMContentLoaded", () => {
 // GSAP 플러그인 등록
 gsap.registerPlugin(ScrollTrigger);
 
+// 1. 카테고리 명칭을 백엔드/폴더 기준과 동일하게 통일
 const categories = [
     "취업/직무",    // job
     "창업/사업",    // startup
     "주거/자립",    // housing
     "금융/생활비",  // finance
     "교육/자격증",  // growth
-    "복지/문화"     // welfare
+    "복지/문화"     // welfare(폴더에 'welfare' 파일이 있으므로 이것과 매핑됨)
 ];
 
-function generatePolicyData(count) {
-    const data = [];
-    for (let i = 1; i <= count; i++) {
-        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-        data.push({
-            id: i,
-            category: randomCategory,
-            title: `[${randomCategory}] 청년 정책 제목 ${i}`,
-            desc: "이 정책은 서울시 청년들을 위한 맞춤형 지원 사업입니다. 혜택을 놓치지 마세요.",
-            date: `2025.12.${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')} 마감`,
-            image: `https://placehold.co/600x400/transparent/dddddd?text=Img+${i}`
-        });
-    }
-    return data;
-}
+
+// function generatePolicyData(count) {
+//     const data = [];
+//     for (let i = 1; i <= count; i++) {
+//         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+//         data.push({
+//             id: i,
+//             category: randomCategory,
+//             title: `[${randomCategory}] 청년 정책 제목 ${i}`,
+//             desc: "이 정책은 서울시 청년들을 위한 맞춤형 지원 사업입니다. 혜택을 놓치지 마세요.",
+//             date: `2025.12.${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')} 마감`,
+//             image: `https://placehold.co/600x400/transparent/dddddd?text=Img+${i}`
+//         });
+//     }
+//     return data;
+// }
 
 const tinderData = generatePolicyData(10);
 const allSlideData = generatePolicyData(30);
 const myLikedData = generatePolicyData(5);
 
 // ==================== [2. UI Rendering Helpers] ====================
-function createCardHTML(item, isTinder = false) {
-    const isMobile = window.innerWidth <= 768; // 모바일 체크
 
-    // 1. 이미지 경로 생성 로직
-    // (1) 카테고리 이름(한글)을 파일명 접두사(영어)로 연결
+// 2. 데이터 생성 함수 (로컬 이미지 경로 주입)
+function generatePolicyData(count) {
+    // 내부 매핑용 객체 (한글 카테고리 -> 영어 파일명 접두사)
     const categoryMap = {
-        // [백엔드 카테고리명] : [이미지 파일 접두사]
-        "취업/직무": "job",       // job_1.webp
-        "창업/사업": "startup",   // startup_1.webp
-        "주거/자립": "housing",   // housing_1.webp
-        "금융/생활비": "finance", // finance_1.webp
-        "교육/자격증": "growth",  // growth_1.webp
-        "복지/문화": "welfare"    // welfare_1.webp
+        "취업/직무": "job",
+        "창업/사업": "startup",
+        "주거/자립": "housing",
+        "금융/생활비": "finance",
+        "교육/자격증": "growth",
+        "복지/건강": "welfare"
     };
 
-    // (2) 영문 접두사 찾기 (없으면 'welfare' 기본값)
-    const prefix = categoryMap[item.category] || "welfare";
+    const data = [];
+    for (let i = 1; i <= count; i++) {
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 
-    // (3) ID를 기준으로 1~5번 이미지 중 하나 선택 (고정 랜덤)
-    // item.id가 없으면 1번으로 설정
-    const safeId = item.id || 1;
-    const imgIndex = (safeId % 5) + 1;
+        // --- [핵심 로직 상세 설명] ---
 
-    // (4) 최종 경로 완성 (예: /static/images/card_images/job_3.webp)
-    const localImageUrl = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
+        // A. 파일명 접두사 찾기
+        // 예: randomCategory가 "취업/직무"면 prefix는 "job"이 됨
+        const prefix = categoryMap[randomCategory] || "welfare";
+
+        // B. 이미지 번호 순환시키기 (Modulo 연산)
+        // i가 계속 커져도(1, 2, 3... 100), 이미지는 1~5번만 반복해서 씀
+        // (i % 5)의 결과는 0, 1, 2, 3, 4 이므로 여기에 +1을 해서 1, 2, 3, 4, 5를 만듦
+        const imgIndex = (i % 5) + 1;
+
+        // C. 최종 로컬 경로 완성
+        // 결과 예시: "/static/images/card_images/job_3.webp"
+        const localImage = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
+
+        // ---------------------------
+
+        data.push({
+            id: i,
+            category: randomCategory,
+            title: `[${randomCategory}] 청년 정책 제목 ${i}`,
+            desc: "이 정책은 서울시 청년들을 위한 맞춤형 지원 사업입니다. 혜택을 놓치지 마세요.",
+            date: `2025.12.${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')} 마감`,
+
+            // [중요] 이제 'image' 속성에 진짜 로컬 주소가 들어갑니다!
+            image: localImage
+        });
+    }
+    return data;
+}
+
+function createCardHTML(item, isTinder = false) {
+    const isMobile = window.innerWidth <= 768; // 모바일 체크
 
     // [Tinder 카드일 때]
     if (isTinder) {
