@@ -22,6 +22,9 @@
                         'primary-beige': '#D9B36C'
                     },
                     fontFamily: { sans: ['Pretendard', 'sans-serif'] },
+                    screens: {
+                        'xs': '500px'
+                    },
                     boxShadow: {
                         'floating': '0 20px 40px -5px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.1)',
                     }
@@ -32,35 +35,38 @@
     <style>
         .perspective-wrap {
             perspective: 1000px;
+            /* 자식들에게 3D 공간 제공 */
+        }
+
+        /* [NEW] 오직 '떠오르는' 역할만 하는 중간 관리자 */
+        .card-lifter {
+            width: 100%;
+            height: 100%;
             transform-style: preserve-3d;
+            will-change: transform;
+            /* 부드러운 움직임 보장 */
         }
 
         .policy-card {
             transform-style: preserve-3d;
-            /* 텍스트 선명도를 위한 설정 */
             backface-visibility: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            /* 회전 시 계단 현상 방지 */
             transform: translateZ(0);
-            outline: none;
-            will-change: transform;
-            /* 성능 최적화 */
+            width: 100%;
+            height: 100%;
         }
 
-        /* [수정] Glare(광택) CSS 완전 삭제 */
-
-        /* [수정] 텍스트(.card-content)의 3D 속성을 제거하여 선명도 확보 */
         .card-content {
-            transform: translateZ(0);
-            /* 바닥에 딱 붙임 (선명함) */
+            transform: translateZ(1px);
+            /* 카드 면보다 아주 살짝 위 (글자 깨짐 방지) */
             background-color: #fff;
-            /* 배경색 명시 */
         }
 
-        /* 이미지는 3D 효과 유지 (입체감) */
         .card-image {
             transform-style: preserve-3d;
             transform: translateZ(20px);
+            /* 이미지는 더 튀어나오게 */
         }
     </style>
 </head>
@@ -74,7 +80,25 @@
                     onerror="this.src='https://placehold.co/100x40/transparent/333?text=LOGO'" alt="Logo"
                     class="h-10 w-auto">
             </a>
-            <ul class="flex gap-2 md:gap-3">
+            <ul class="hidden xs:flex gap-2 md:gap-3">
+                <button id="hamburger-btn"
+                    class="xs:hidden absolute right-5 top-1/2 -translate-y-1/2 text-gray-700 hover:text-primary-teal transition-colors p-2">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+
+                <div id="mobile-menu"
+                    class="hidden absolute top-[80px] left-0 w-full bg-white border-b border-gray-100 shadow-lg p-5 flex flex-col gap-3 z-50">
+                    <a href="/main.html"
+                        class="block w-full text-center py-3 rounded-lg font-bold text-gray-600 hover:bg-gray-50">Home</a>
+                    <a href="/all.html"
+                        class="block w-full text-center py-3 rounded-lg font-bold text-primary-teal bg-teal-50">All
+                        Policies</a>
+                    <a href="/mypage.html"
+                        class="block w-full text-center py-3 rounded-lg font-bold text-gray-600 hover:bg-gray-50">My
+                        Page</a>
+                    <a href="/about.html"
+                        class="block w-full text-center py-3 rounded-lg font-bold text-gray-600 hover:bg-gray-50">About</a>
+                </div>
                 <li><a href="/"
                         class="flex items-center justify-center rounded-full px-4 py-2 text-[14px] md:text-[15px] font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all">Home</a>
                 </li>
@@ -95,194 +119,287 @@
         <header class="text-center mb-16">
             <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">정책 카드 컬렉션 ✨</h1>
             <p class="text-gray-500 text-lg">마우스를 올려보세요! 화면 크기에 맞춰 카드가 반응합니다.</p>
+
+            <div class="max-w-2xl mx-auto mb-6">
+                <div
+                    class="relative flex items-center w-full h-14 rounded-full focus-within:shadow-lg bg-white overflow-hidden border border-gray-200 shadow-sm transition-shadow duration-300">
+                    <div class="grid place-items-center h-full w-12 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </div>
+                    <input class="peer h-full w-full outline-none pr-5 text-base bg-transparent placeholder-gray-400"
+                        style="color: #1f2937;" type="text" id="search-input"
+                        placeholder="키워드를 입력해보세요 (예: 청년, 월세, 취업)" />
+                </div>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto pb-2 justify-center hide-scrollbar" id="category-filters">
+                <button
+                    class="filter-btn active px-5 py-2 rounded-full bg-gray-800 text-white text-sm font-bold transition-all shadow-md hover:bg-black"
+                    data-category="all">전체</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-orange-50 hover:text-primary-orange hover:border-primary-orange transition-all"
+                    data-category="주거">🏠 주거</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-teal-50 hover:text-primary-teal hover:border-primary-teal transition-all"
+                    data-category="취업">💼 취업</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-yellow-50 hover:text-primary-beige hover:border-primary-beige transition-all"
+                    data-category="금융">💰 금융</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-red-50 hover:text-[#FF5A5F] hover:border-[#FF5A5F] transition-all"
+                    data-category="복지">🍀 복지</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-all"
+                    data-category="교육">🎓 교육</button>
+                <button
+                    class="filter-btn px-5 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-purple-50 hover:text-purple-500 hover:border-purple-500 transition-all"
+                    data-category="창업">🚀 창업</button>
+            </div>
         </header>
 
         <div id="card-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-10">
         </div>
+        <div id="loading-indicator" class="hidden w-full flex justify-center items-center py-10">
+            <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-primary-teal"></div>
+        </div>
+
+        <div id="no-result" class="hidden text-center py-20">
+            <div class="text-6xl mb-4 grayscale opacity-50">🤔</div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">검색 결과가 없어요.</h3>
+            <p class="text-gray-500">다른 키워드로 검색하거나 필터를 '전체'로 변경해보세요.</p>
+        </div>
     </main>
 
     <script>
-        // 1. 카테고리 매핑 정보 추가 (이미지 파일명 연결용)
-        const categoryMap = {
-            "주거": "housing",
-            "취업": "job",
-            "금융": "finance",
-            "복지": "welfare",
-            "창업": "startup",
-            "교육": "growth"
+        // --- 1. 유틸리티 & 설정 ---
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func(...args), delay);
+            };
         };
 
-        const policyData = [
-            // [추가] 데이터에 colorCode 속성을 추가하여 보더 색상 매핑 (없으면 기본값 사용)
-            { id: 1, title: "청년 안심 주택", category: "주거", img: "https://placehold.co/400x500/F48245/white?text=Housing", desc: "역세권 청년 주택 입주자 모집 공고입니다.", colorCode: "#F48245" },
-            { id: 2, title: "취업 사관학교", category: "취업", img: "https://placehold.co/400x300/4A9EA8/white?text=Job", desc: "SW 개발자 데뷔 과정 무료 교육생 모집", colorCode: "#4A9EA8" },
-            { id: 3, title: "학자금 대출 이자", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Loan", desc: "학자금 대출 이자 전액 지원", colorCode: "#D9B36C" },
-            { id: 4, title: "마음 건강 상담소", category: "복지", img: "https://placehold.co/400x600/FF5A5F/white?text=Mind", desc: "전문 심리 상담사와 1:1 무료 상담", colorCode: "#FF5A5F" },
-            { id: 5, title: "전세 보증금 반환", category: "주거", img: "https://placehold.co/400x350/333/white?text=Rent", desc: "전세 사기 걱정 없는 보증료 지원", colorCode: "#F48245" },
-            { id: 6, title: "미래 청년 일자리", category: "취업", img: "https://placehold.co/400x450/4A9EA8/white?text=Future", desc: "신산업 분야 기업 매칭 및 인건비 지원", colorCode: "#4A9EA8" },
-            { id: 7, title: "문화 예술 패스", category: "복지", img: "https://placehold.co/400x250/FF5A5F/white?text=Art", desc: "공연, 전시 관람비 10만원 지원", colorCode: "#FF5A5F" },
-            { id: 8, title: "청년 대중교통비", category: "금융", img: "https://placehold.co/400x400/D9B36C/white?text=Transport", desc: "대중교통 이용요금 일부 환급", colorCode: "#D9B36C" }
-        ].map(item => {
-            // [핵심] 여기서 로컬 이미지 경로를 자동으로 만들어줍니다!
+        const categoryMap = { "주거": "housing", "취업": "job", "금융": "finance", "복지": "welfare", "창업": "startup", "교육": "growth" };
+        const baseData = [
+            { id: 1, title: "청년 안심 주택", category: "주거", desc: "역세권 청년 주택 입주자 모집 공고", colorCode: "#F48245" },
+            { id: 2, title: "취업 사관학교", category: "취업", desc: "SW 개발자 데뷔 과정 무료 교육생 모집", colorCode: "#4A9EA8" },
+            { id: 3, title: "학자금 대출 이자", category: "금융", desc: "학자금 대출 이자 전액 지원", colorCode: "#D9B36C" },
+            { id: 4, title: "마음 건강 상담소", category: "복지", desc: "전문 심리 상담사와 1:1 무료 상담", colorCode: "#FF5A5F" },
+            { id: 5, title: "전세 보증금 반환", category: "주거", desc: "전세 사기 걱정 없는 보증료 지원", colorCode: "#F48245" },
+            { id: 6, title: "미래 청년 일자리", category: "취업", desc: "신산업 분야 기업 매칭 및 인건비 지원", colorCode: "#4A9EA8" },
+            { id: 7, title: "문화 예술 패스", category: "복지", desc: "공연, 전시 관람비 10만원 지원", colorCode: "#FF5A5F" },
+            { id: 8, title: "청년 대중교통비", category: "금융", desc: "대중교통 이용요금 일부 환급", colorCode: "#D9B36C" }
+        ];
+
+        // 이미지 경로 매핑
+        const policyData = baseData.map(item => {
             const prefix = categoryMap[item.category] || "welfare";
             const imgIndex = (item.id % 5) + 1;
-            // img 속성을 덮어씌움 (기존 url 삭제됨)
             item.img = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
             return item;
         });
 
-        function renderCards() {
-            const container = document.getElementById('card-container');
-            container.innerHTML = policyData.map(item => `
-            <div class="perspective-wrap group h-full">
-                <div class="policy-card relative bg-white rounded-xl overflow-hidden h-full flex flex-col border border-gray-100 shadow-sm transition-shadow" 
-                     tabindex="0"
-                     data-color="${item.colorCode}"> 
-                    
-                    <div class="card-image w-full bg-white flex items-end justify-center shrink-0 h-[200px] overflow-hidden">
-                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                    </div>
-
-                    <div class="card-content text-left flex-grow flex flex-col justify-between p-5 z-20 relative">
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xs font-bold text-primary-orange bg-orange-100 px-2 py-0.5 rounded">#${item.category}</span>
-                            </div>
-                            <h3 class="card-title mb-2 line-clamp-1 text-xl font-extrabold text-[#222] group-hover:text-primary-teal transition-colors">${item.title}</h3>
-                            <p class="card-desc line-clamp-2 text-sm text-[#666] font-medium">${item.desc}</p>
-                        </div>
-                        <div class="card-date flex justify-between items-center mt-4 text-xs text-[#888] border-t pt-3 border-gray-100">
-                            <span>2025.12.31 마감</span>
-                            <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-primary-teal transition-transform group-hover:translate-x-1"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-            init3DEffect();
-        }
-
+        // --- 2. 3D 효과 로직 (완전 분리 구조) ---
         function init3DEffect() {
+            if (window.innerWidth < 768) return;
+
             const wrappers = document.querySelectorAll('.perspective-wrap');
 
-            const getResponsiveSettings = () => {
-                const width = window.innerWidth;
-
-                if (width >= 1280) {
-                    return { scale: 1.2, y: -15 };
-                } else if (width >= 1024) {
-                    return { scale: 1.15, y: -12 };
-                } else if (width >= 640) {
-                    return { scale: 1.08, y: -8 };
-                } else {
-                    return { scale: 1.03, y: -4 };
-                }
-            };
-
             wrappers.forEach(wrapper => {
+                if (wrapper.dataset.gsapInitialized) return;
+                wrapper.dataset.gsapInitialized = "true";
+
+                // [핵심 분리]
+                // lifter: 위아래 움직임 담당
+                // card: 회전 담당
+                const lifter = wrapper.querySelector('.card-lifter');
                 const card = wrapper.querySelector('.policy-card');
                 const cardImage = wrapper.querySelector('.card-image img');
+                const borderColor = card.dataset.color;
 
-                // [추가 기능] 카드별 테두리 색상 가져오기
-                const borderColor = card.dataset.color || '#4A9EA8';
-
-                // --- 1. 진입 효과 (Hover & Focus) ---
-                const handleEnter = () => {
-                    const settings = getResponsiveSettings();
-
+                // Enter: 리프터(lifter)만 움직임
+                wrapper.addEventListener('mouseenter', () => {
                     gsap.set(wrapper, { zIndex: 50 });
-
-                    gsap.to(card, {
+                    gsap.to(lifter, {
+                        y: -12, // 위로 둥실
+                        scale: 1.05,
                         duration: 0.4,
-                        scale: settings.scale,
-                        y: settings.y,
-                        // [추가 기능] 호버 시 카테고리 색상으로 Border 변경
-                        borderColor: borderColor,
-                        boxShadow: `0 30px 60px -10px rgba(0,0,0,0.25)`,
-                        ease: "back.out(1.5)",
+                        ease: "back.out(1.4)",
                         overwrite: "auto"
                     });
-                };
+                    gsap.to(card, {
+                        borderColor: borderColor,
+                        boxShadow: "0 20px 40px -5px rgba(0,0,0,0.2)",
+                        duration: 0.3
+                    });
+                });
 
-                wrapper.addEventListener('mouseenter', handleEnter);
-                card.addEventListener('focusin', handleEnter);
-
-
-                // --- 2. 움직임 효과 (Tilt + Parallax) ---
+                // Move: 카드(card)만 회전시킴 (리프터는 건드리지 않음 -> 충돌 원천 봉쇄)
                 wrapper.addEventListener('mousemove', (e) => {
-                    if (window.innerWidth < 768) return;
-
                     const rect = wrapper.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
 
-                    // 틸트 각도
-                    const rotateX = ((y - centerY) / centerY) * -10;
-                    const rotateY = ((x - centerX) / centerX) * 10;
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
 
                     gsap.to(card, {
-                        duration: 0.2,
                         rotateX: rotateX,
                         rotateY: rotateY,
-                        transformPerspective: 1000,
+                        duration: 0.1, // 반응속도 빠르게
                         ease: "power1.out",
-                        overwrite: "auto"
+                        overwrite: "auto" // 같은 요소끼리만 관리
                     });
 
-                    // 이미지는 반대로 움직여 깊이감 형성 (패럴랙스)
-                    gsap.to(cardImage, {
-                        duration: 0.2,
-                        x: (x - centerX) * 0.05,
-                        y: (y - centerY) * 0.05,
-                        ease: "power1.out"
-                    });
-
-                    // [수정] 텍스트 패럴랙스 제거 (선명도 확보를 위해)
-                    // 텍스트는 움직이지 않고 카드에 딱 붙어있게 합니다.
+                    // 이미지 패럴랙스 강도 조절
+                    if (cardImage) {
+                        gsap.to(cardImage, {
+                            // 기존 0.08 -> 0.035 로 변경 (움직임 범위 축소)
+                            x: (x - centerX) * 0.05,
+                            y: (y - centerY) * 0.05,
+                            // duration을 0.2 -> 0.4 로 늘림 (반응 속도를 늦춰서 더 묵직하게)
+                            duration: 2.0,
+                            ease: "power2.out"
+                        });
+                    }
                 });
 
+                // Leave: 둘 다 원상복구
+                wrapper.addEventListener('mouseleave', () => {
+                    gsap.delayedCall(0.3, () => gsap.set(wrapper, { zIndex: 1 }));
 
-                // --- 3. 나감 효과 (Reset) ---
-                const handleLeave = () => {
-                    gsap.delayedCall(0.3, () => { gsap.set(wrapper, { zIndex: 1 }); });
+                    // 리프터 복구
+                    gsap.to(lifter, { y: 0, scale: 1, duration: 0.5, ease: "power3.out" });
 
+                    // 카드 복구
                     gsap.to(card, {
-                        duration: 0.6,
-                        scale: 1,
-                        y: 0,
-                        rotateX: 0,
-                        rotateY: 0,
-                        borderColor: '#e5e7eb', // 원래 회색(gray-200)으로 복구
+                        rotateX: 0, rotateY: 0,
+                        borderColor: '#e5e7eb',
                         boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-                        ease: "power3.out",
-                        overwrite: true
-                    });
-
-                    gsap.to(cardImage, {
-                        duration: 0.6,
-                        x: 0,
-                        y: 0,
+                        duration: 0.3,
                         ease: "power3.out"
                     });
-                };
 
-                wrapper.addEventListener('mouseleave', handleLeave);
-                card.addEventListener('focusout', handleLeave);
-            });
-
-            gsap.from(".perspective-wrap", {
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.1,
-                ease: "power2.out"
+                    if (cardImage) gsap.to(cardImage, { x: 0, y: 0, duration: 0.3 });
+                });
             });
         }
 
-        renderCards();
+        // 등장 애니메이션 (lifter를 아래에서 위로)
+        function playEntranceAnimation() {
+            gsap.from(".card-lifter", {
+                y: 50,
+                opacity: 0,
+                duration: 0.6,
+                stagger: 0.05,
+                ease: "power2.out",
+                clearProps: "all" // 애니메이션 끝나면 간섭하지 않게 속성 날림
+            });
+        }
+
+        // --- 3. 렌더링 함수 (HTML 구조 변경됨) ---
+        function renderCards(filterCategory = "all", keyword = "", isInitialLoad = false) {
+            const container = document.getElementById('card-container');
+            const noResult = document.getElementById('no-result');
+
+            const filteredData = policyData.filter(item => {
+                const matchCategory = filterCategory === "all" || item.category === filterCategory;
+                const matchKeyword = item.title.includes(keyword) || item.desc.includes(keyword) || item.category.includes(keyword);
+                return matchCategory && matchKeyword;
+            });
+
+            if (filteredData.length === 0) {
+                container.innerHTML = "";
+                if (noResult) noResult.classList.remove('hidden');
+                return;
+            }
+            if (noResult) noResult.classList.add('hidden');
+
+            // [핵심] .perspective-wrap > .card-lifter > .policy-card 구조 생성
+            container.innerHTML = filteredData.map(item => {
+                const itemJson = encodeURIComponent(JSON.stringify(item));
+                return `
+                <div class="perspective-wrap h-full cursor-pointer group" onclick="openCardModal(this)" data-json="${itemJson}" style="z-index: 1;">
+                    <div class="card-lifter">
+                        <div class="policy-card relative bg-white rounded-xl overflow-hidden h-full flex flex-col border border-gray-100 shadow-sm transition-colors"
+                             data-color="${item.colorCode}">
+                            
+                            <div class="card-image w-full bg-white flex items-end justify-center shrink-0 h-[200px] overflow-hidden relative">
+                                <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover" onerror="this.src='/static/images/card_images/default.png'">
+                            </div>
+
+                            <div class="card-content text-left bg-white flex-grow flex flex-col justify-between p-5 z-20 relative">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-xs font-bold text-primary-orange bg-orange-100 px-2 py-0.5 rounded">#${item.category}</span>
+                                    </div>
+                                    <h3 class="card-title mb-2 line-clamp-1 text-xl font-extrabold text-[#222] group-hover:text-primary-teal transition-colors">${item.title}</h3>
+                                    <p class="card-desc line-clamp-2 text-sm text-[#666] font-medium leading-relaxed">${item.desc}</p>
+                                </div>
+                                <div class="card-date flex justify-between items-center mt-4 text-xs text-[#888] border-t pt-3 border-gray-100">
+                                    <span>2025.12.31 마감</span>
+                                    <i class="fa-solid fa-arrow-right text-gray-300 group-hover:text-primary-teal transition-transform group-hover:translate-x-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            init3DEffect();
+            // 초기 로드이거나 카테고리 필터 클릭일 때만 등장 효과
+            if (isInitialLoad || (keyword === "" && !isInitialLoad)) playEntranceAnimation();
+        }
+
+        // --- 4. 초기화 및 이벤트 연결 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards("all", "", true);
+
+            const searchInput = document.getElementById('search-input');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce((e) => {
+                    const currentBtn = document.querySelector('.filter-btn.active');
+                    const currentCategory = currentBtn ? currentBtn.dataset.category : 'all';
+                    renderCards(currentCategory, e.target.value);
+                }, 300));
+            }
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-gray-800', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-600', 'border');
+                    });
+                    btn.classList.remove('bg-white', 'text-gray-600', 'border');
+                    btn.classList.add('bg-gray-800', 'text-white');
+                    btn.classList.add('active');
+
+                    const keyword = searchInput ? searchInput.value : "";
+                    renderCards(btn.dataset.category, keyword, false);
+                });
+            });
+
+            // 햄버거 메뉴
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (hamburgerBtn && mobileMenu) {
+                hamburgerBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        gsap.fromTo(mobileMenu, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.3 });
+                    }
+                });
+            }
+        });
+
+        function openCardModal(element) {
+            console.log("모달 열기:", element.dataset.json);
+        }
     </script>
 </body>
 
