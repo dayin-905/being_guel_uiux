@@ -27,71 +27,56 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==================== [1. Config & Data] ====================
-// GSAP 플러그인 등록
 gsap.registerPlugin(ScrollTrigger);
 
-// 1. 카테고리 명칭을 백엔드/폴더 기준과 동일하게 통일
+// 1. 카테고리 명칭 정의
 const categories = [
     "취업/직무",    // job
     "창업/사업",    // startup
     "주거/자립",    // housing
     "금융/생활비",  // finance
     "교육/자격증",  // growth
-    "복지/문화"     // welfare(폴더에 'welfare' 파일이 있으므로 이것과 매핑됨)
+    "복지/문화"     // welfare
 ];
 
-
-// function generatePolicyData(count) {
-//     const data = [];
-//     for (let i = 1; i <= count; i++) {
-//         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-//         data.push({
-//             id: i,
-//             category: randomCategory,
-//             title: `[${randomCategory}] 청년 정책 제목 ${i}`,
-//             desc: "이 정책은 서울시 청년들을 위한 맞춤형 지원 사업입니다. 혜택을 놓치지 마세요.",
-//             date: `2025.12.${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')} 마감`,
-//             image: `https://placehold.co/600x400/transparent/dddddd?text=Img+${i}`
-//         });
-//     }
-//     return data;
-// }
-
-const tinderData = generatePolicyData(10);
-const allSlideData = generatePolicyData(30);
-const myLikedData = generatePolicyData(5);
-
-// ==================== [2. UI Rendering Helpers] ====================
-
-// 2. 데이터 생성 함수 (로컬 이미지 경로 주입)
+// 2. 데이터 생성 함수 (로컬 이미지 자동 매핑 - 카운터 방식 적용)
 function generatePolicyData(count) {
-    // 내부 매핑용 객체 (한글 카테고리 -> 영어 파일명 접두사)
+    // 2-1. 한글 카테고리 -> 영어 파일명 접두사 매핑
     const categoryMap = {
         "취업/직무": "job",
         "창업/사업": "startup",
         "주거/자립": "housing",
         "금융/생활비": "finance",
         "교육/자격증": "growth",
-        "복지/건강": "welfare"
+        "복지/문화": "welfare" // 복지/건강 -> 복지/문화로 통일
     };
+
+    // 2-2. [핵심] 카테고리별 이미지 번호 카운터 (all.html 로직 이식)
+    // 예: { "주거/자립": 0, "취업/직무": 2 ... }
+    const categoryCounters = {};
 
     const data = [];
     for (let i = 1; i <= count; i++) {
         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 
-        // --- [핵심 로직 상세 설명] ---
+        // --- 이미지 경로 생성 로직 ---
 
-        // A. 파일명 접두사 찾기
-        // 예: randomCategory가 "취업/직무"면 prefix는 "job"이 됨
+        // A. 카운터 초기화 (해당 카테고리가 처음이면 0)
+        if (categoryCounters[randomCategory] === undefined) {
+            categoryCounters[randomCategory] = 0;
+        }
+
+        // B. 현재 카운터 숫자를 가져와서 이미지 번호 결정 (1~5 순환)
+        const imgNum = categoryCounters[randomCategory];
+        const imgIndex = (imgNum % 5) + 1;
+
+        // C. 카운터 증가 (다음 같은 카테고리 아이템을 위해)
+        categoryCounters[randomCategory]++;
+
+        // D. 파일명 접두사 찾기
         const prefix = categoryMap[randomCategory] || "welfare";
 
-        // B. 이미지 번호 순환시키기 (Modulo 연산)
-        // i가 계속 커져도(1, 2, 3... 100), 이미지는 1~5번만 반복해서 씀
-        // (i % 5)의 결과는 0, 1, 2, 3, 4 이므로 여기에 +1을 해서 1, 2, 3, 4, 5를 만듦
-        const imgIndex = (i % 5) + 1;
-
-        // C. 최종 로컬 경로 완성
-        // 결과 예시: "/static/images/card_images/job_3.webp"
+        // E. 최종 경로 완성
         const localImage = `/static/images/card_images/${prefix}_${imgIndex}.webp`;
 
         // ---------------------------
@@ -102,13 +87,18 @@ function generatePolicyData(count) {
             title: `[${randomCategory}] 청년 정책 제목 ${i}`,
             desc: "이 정책은 서울시 청년들을 위한 맞춤형 지원 사업입니다. 혜택을 놓치지 마세요.",
             date: `2025.12.${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')} 마감`,
-
-            // [중요] 이제 'image' 속성에 진짜 로컬 주소가 들어갑니다!
-            image: localImage
+            image: localImage // 생성된 로컬 주소 할당
         });
     }
     return data;
 }
+
+// 3. 데이터 생성 실행
+const tinderData = generatePolicyData(10);
+const allSlideData = generatePolicyData(30);
+const myLikedData = generatePolicyData(5);
+
+// ==================== [2. UI Rendering Helpers] ====================
 
 function createCardHTML(item, isTinder = false) {
     const isMobile = window.innerWidth <= 768; // 모바일 체크
